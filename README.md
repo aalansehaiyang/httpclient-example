@@ -1,4 +1,4 @@
-#### 主要是httpclient各种交互场景的案例
+### 主要是httpclient各种交互场景的案例
 
 * HttpServer
 
@@ -10,4 +10,4 @@
 
 * ClientExecuteProxy
 
-通过代理的方式发送一个请求，并对reponse解析
+通过代理的方式发送一个请求，并对response解析
