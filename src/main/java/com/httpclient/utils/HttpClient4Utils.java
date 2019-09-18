@@ -20,18 +20,21 @@ import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
-public class HttpServer {
+/**
+ * @author onlyone
+ */
+public class HttpClient4Utils {
 
     /**
-     * 发post请求，拿结果
+     * 实例化HttpClient
+     * 
+     * @param maxTotal
+     * @param maxPerRoute
+     * @param socketTimeout
+     * @param connectTimeout
+     * @param connectionRequestTimeout
+     * @return
      */
-    public static void main(String[] args) {
-        HttpClient httpClient = HttpServer.createHttpClient(10, 10, 4000, 4000, 4000);
-        String url = "http://geek.csdn.net/";
-        String result = HttpServer.sendPost(httpClient, url, null, null, null);
-        System.out.println(result);
-    }
-
     public static HttpClient createHttpClient(int maxTotal, int maxPerRoute, int socketTimeout, int connectTimeout,
                                               int connectionRequestTimeout) {
         RequestConfig defaultRequestConfig = RequestConfig.custom().setSocketTimeout(socketTimeout).setConnectTimeout(connectTimeout).setConnectionRequestTimeout(connectionRequestTimeout).build();
@@ -45,12 +48,14 @@ public class HttpServer {
     /**
      * 发送post请求
      * 
+     * @param httpClient
      * @param url 请求地址
      * @param params 请求参数
      * @param encoding 编码
+     * @return
      */
-    public static String sendPost(HttpClient httpClient, String url, Map<String, String> params, String cookie,
-                                  Charset encoding) {
+    public static String sendPost(HttpClient httpClient, String url, Map<String, String> headers,
+                                  Map<String, String> params, Charset encoding) {
         String resp = "";
         HttpPost httpPost = new HttpPost(url);
         if (params != null && params.size() > 0) {
@@ -63,50 +68,49 @@ public class HttpServer {
             UrlEncodedFormEntity postEntity = new UrlEncodedFormEntity(formParams, encoding);
             httpPost.setEntity(postEntity);
         }
-
-        httpPost.setHeader("Cookie", cookie);
+        if (headers != null) {
+            headers.forEach((k, v) -> {
+                httpPost.setHeader(k.trim(), v.trim());
+            });
+        }
         CloseableHttpResponse response = null;
         try {
             response = (CloseableHttpResponse) httpClient.execute(httpPost);
             resp = EntityUtils.toString(response.getEntity(), encoding);
-
-            // String setCookie = response.getFirstHeader("Set-Cookie").getValue();
-            // System.out.println("setCookie=" + setCookie);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e);
         } finally {
             if (response != null) {
                 try {
                     response.close();
                 } catch (IOException e) {
-                    // log
-                    e.printStackTrace();
+                    System.out.println(e);
                 }
             }
         }
         return resp;
     }
 
-    public static String sendGet(HttpClient httpClient, String url, String cookie, Charset encoding) {
+    public static String sendGet(HttpClient httpClient, String url, Map<String, String> headers, Charset encoding) {
         String resp = "";
         HttpGet httpGet = new HttpGet(url);
-
-        httpGet.setHeader("Cookie", cookie);
+        if (headers != null) {
+            headers.forEach((k, v) -> {
+                httpGet.setHeader(k.trim(), v.trim());
+            });
+        }
         CloseableHttpResponse response = null;
         try {
             response = (CloseableHttpResponse) httpClient.execute(httpGet);
             resp = EntityUtils.toString(response.getEntity(), encoding);
-            // String setCookie = response.getFirstHeader("Set-Cookie").getValue();
-            // System.out.println("setCookie=" + setCookie);
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e);
         } finally {
             if (response != null) {
                 try {
                     response.close();
                 } catch (IOException e) {
-                    // log
-                    e.printStackTrace();
+                    System.out.println(e);
                 }
             }
         }
